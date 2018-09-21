@@ -1,0 +1,184 @@
+# Fonte dos dados: MiniCursoSPRING http://www.dpi.inpe.br/spring/portugues/manuais.html 
+
+# Instala os pacotes necessários
+install.packages("raster")
+install.packages("sp")
+install.packages("rgdal") # A instalação do pacote "rgdal" é diferente, necessitando de outras etapas
+install.packages"rgeos"
+
+# Carrega os pacotes necessários
+library(raster)
+library(sp)
+library(rgeos)
+library(rgdal)
+
+# Seleciona a pasta que irá carregar e salvar os arquivos
+setwd("/home/deleon/Documents/Github")
+
+# Carrega os arquivos raster no R
+B3 = raster("/home/deleon/Documents/Github/LandSatTM3.tif")
+B4 = raster("/home/deleon/Documents/Github/LandSatTM4.tif")
+
+# Camada com dois pontos para cortar os raster B3 e B4
+pontos_corte1=data.frame(x=c(185080, 201059),y=c(8260645, 8245020))
+coordinates(pontos_corte1)=~x+y
+
+# Define a projeção cartográfica da camada de pontos para a mesma projeção do raster
+# Essa etapa deve ser repetida sempre que uma nova camada é criada
+# Se uma camada projetada for usada para criar outras, elas herdarão a projeção
+proj4string(pontos_corte1)=CRS(projection(B3))
+plot(pontos_corte1,add=TRUE)
+
+pontos_corte2=data.frame(x=c(182747,197347),y=c(8258312,8247565))
+coordinates(pontos_corte2)=~x+y
+proj4string(pontos_corte1)=CRS(projection(B4))
+plot(pontos_corte2,add=TRUE)
+
+# Corte do raster B3 com as dimensões da camada pontos_corte1
+parte1=crop(B3,pontos_corte1)
+plot(parte1)
+
+parte2=crop(B4,pontos_corte2)
+plot(parte2)
+
+# Corta o raster parte1 com a região sobreposta pelas duas imagens
+intersecao=intersect(parte1,parte2)
+plot(intersecao5)
+
+plot(parte1)
+plot(parte2,add=TRUE)
+plot(intersecao,add=TRUE)
+
+plot(parte1)
+plot(parte2,add=TRUE)
+plot(intersecao,col="yellow",add=TRUE)
+
+intersecao
+summary(intersecao)
+projection(intersecao)
+
+# Cria um polígono contendo os vértices do raster intersecao
+vertices=data.frame(x=c(intersecao@extent@xmin,intersecao@extent@xmin,intersecao@extent@xmax,intersecao@extent@xmax,intersecao@extent@xmin),
+                    y=c(intersecao@extent@ymin,intersecao@extent@ymax,intersecao@extent@ymax,intersecao@extent@ymin,intersecao@extent@ymin))
+
+p=Polygon(vertices)
+ps=Polygons(list(p),1)
+limites=SpatialPolygons(list(ps))
+plot(limites, axes=TRUE,lwd=1.5)
+plot(intersecao, add=TRUE)
+
+projection(limites)
+proj4string(limites)=CRS(projection(intersecao))
+projection(limites)
+
+# Cria uma camada de pontos aleatórios e outra com pontos regulares delimitados pela camada limites
+grade_aleatoria = spsample(limites,100,type="random")
+plot(grade_aleatoria)
+grade_regular = spsample(limites,100,type = "regular")
+plot(grade_regular)
+
+# Cria o campo ID na tabela de atributos
+grade_regular
+grade_regular$ID=1:length(grade_regular)
+grade_regular
+
+plot(intersecao)
+plot(grade_regular, add=TRUE)
+plot(grade_aleatoria,col="blue",pch="x", add=TRUE)
+
+# Outra forma de criar uma camada de pontos aleatórios
+pontos_aleatorios=data.frame(x=runif(150,min=intersecao@extent@xmin, max=intersecao@extent@xmax),
+                             y=runif(150,intersecao@extent@ymin, max=intersecao@extent@ymax),
+                             z=rnorm(150,mean = 1,sd=0.02))
+
+coordinates(pontos_aleatorios)=~x+y
+plot(intersecao)
+plot(pontos_aleatorios, add=TRUE)
+
+pontos_aleatorios
+proj4string(pontos_aleatorios)=CRS(projection(intersecao))
+pontos_aleatorios
+
+# Multiplica os dados do campo z da tabela de atributos do objeto pontos_aleatorios pelo valor do pixel de mesmas coordenadas do objeto intersecao
+summary(pontos_aleatorios$z)
+pontos_aleatorios$z=pontos_aleatorios$z*(extract(intersecao,pontos_aleatorios))
+summary(pontos_aleatorios$z)
+
+# Buffer da camada pontos_aleatorios com uma feição para todos os pontos
+pontos_buffer1=gBuffer(pontos_aleatorios,width = 200)
+pontos_buffer1
+plot(intersecao)
+plot(pontos_buffer1,add=TRUE)
+
+# Buffer da camada pontos_aleatorios com uma feição para cada ponto
+pontos_buffer=gBuffer(pontos_aleatorios,width = 200,byid=TRUE)
+pontos_buffer
+plot(intersecao)
+plot(pontos_buffer,add=TRUE)
+
+gArea(pontos_buffer)
+gArea(pontos_buffer,byid=TRUE)
+
+gLength(pontos_buffer)
+gLength(pontos_buffer,byid=TRUE)
+
+# Exibe apenas os dados do objeto intersecao sobrepostos pela camada pontos_buffer
+mascara=mask(intersecao,pontos_buffer)
+plot(mascara)
+plot(pontos_buffer, add=TRUE)
+
+# Duas formas diferentes de selecionar pontos pela tabela de atributos
+pontos_45=subset(pontos_aleatorios,z > 45)
+plot(mascara)
+plot(pontos_45,add=TRUE)
+
+pontos.45=pontos_aleatorios[pontos_aleatorios$z>45,]
+plot(pontos.45, pch="o", col="red",add=TRUE)
+
+selecao=crop(intersecao,pontos_45)
+plot(selecao, add=TRUE)
+
+# Carrega o shapefile de polígonos Mapa_quadras_pol.shp
+quadras=readOGR("/home/deleon/Documents/Github/Mapa_quadras_pol.shp")
+quadras
+proj4string(quadras)=CRS(projection(intersecao))
+summary(quadras)
+
+plot(intersecao)
+plot(quadras,add=TRUE)
+
+# Exibe a tabela de atributos do objeto quadras
+slotNames(quadras)
+quadras@data
+
+# Seleção de feições da camada quadras pela tabela de atributos (quadras com uso definido como residencial)
+pol_Residencial= subset(quadras,USO=="Residencial")
+plot(intersecao)
+plot(pol_Residencial,add=TRUE)
+
+# Seleção dos pontos que estão inseridos na área das quadras de uso para Residencial
+pontos_Residencial=pontos_aleatorios[pol_Residencial,]
+plot(pontos_Residencial, add=TRUE)
+plot(pontos_aleatorios,col="red", pch=".",cex=2, add=TRUE)
+
+# Diminui a dimensão do pixel. Cada linha e cada coluna de um pixel se dividirão em 4
+# Cada pixel novo será composto por 16 novos pixels com o mesmo valor do original
+# Essa etapa torna a máscara do buffer mais precisa com o polígono do buffer
+intersecao2=disaggregate(intersecao,fact=4)
+intersecao
+intersecao2
+mascara2=mask(intersecao2,pontos_buffer)
+
+plot(mascara2)
+plot(pontos_buffer, add=TRUE)  
+
+# Salva os objetos em shapefiles (objeto raster, "endereço pasta", "nome do arquivo")
+writeOGR(pontos_aleatorios,"pontos","pontos", driver="ESRI Shapefile")
+writeOGR(pontos_buffer,"buffer_pontos","buffer", driver="ESRI Shapefile")
+
+# Salva os objetos em arquivos raster
+writeRaster(mascara,"mascara_buffer.tif",overwrite=TRUE)
+writeRaster(mascara2,"mascara_buffer2.tif",overwrite=TRUE)
+
+# Cria uma tabela contendo todos os códigos EPSG
+EPSG <- make_EPSG()
