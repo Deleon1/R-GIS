@@ -1,0 +1,84 @@
+# NDVI
+
+# Fonte dos dados: MiniCursoSPRING http://www.dpi.inpe.br/spring/portugues/manuais.html 
+# Instala os pacotes necessários
+install.packages("raster")
+install.packages("sp")
+install.packages("rgeos")
+
+# Carrega os pacotes necessários
+library(raster)
+library(sp)
+library(rgeos)
+
+# Seleciona a pasta que irá carregar e salvar os arquivos
+setwd("/home/deleon/Documents/Github")
+
+# Cria a função NDVI
+NDVI = function(RED,NIR){
+  (NIR-RED)/(NIR+RED)
+}
+
+# Carrega os arquivos raster no R
+B3 = raster("LandSatTM3.tif")
+B4 = raster("LandSatTM4.tif")
+plot(B3)
+plot(B4)
+B3
+B4
+
+# Exibe a resolução dos objetos
+res(B3)
+res(B4)
+
+B3_p10=B3
+B4_p10=B4
+
+
+# Sequência de etapas para padronizar a resolução dos objetos B3 E B4 em 10x10m
+if (res(B3_p10)[1]>=10) {
+  B3_p10=disaggregate(B3,fact=c(res(B3)[1]/10,1))
+} else {
+  B3_p10=disaggregate(B3,fact=
+                                c(1/(10/res(B3)[1]),1))
+}
+
+if (res(B3_p10)[2]>=10) {
+  B3_p10=disaggregate(B3,fact=c(res(B3)[2]/10))
+} else {
+  B3_p10=disaggregate(B3,fact=
+                                c(1,1/(10/res(B3)[2])))
+}
+
+if (res(B4_p10)[1]>=10) {
+  B4_p10=disaggregate(B4,fact=c(res(B4)[1]/10,1))
+} else {
+  B4_p10=disaggregate(B4,fact=
+                                c(1/(10/res(B4)[1]),1))
+}
+
+if (res(B4_p10)[2]>=10) {
+  B4_p10=disaggregate(B4,fact=c(res(B4)[2]/10))
+} else {
+  B4_p10=disaggregate(B4,fact=
+                                c(1,1/(10/res(B4)[2])))
+}
+
+B3_p10
+B4_p10
+
+# Seleciona a região de sobreposição dos dois objetos
+intersecao_B3_p10=intersect(B3_p10,B4_p10)
+intersecao_B4_p10=intersect(B4_p10,B3_p10)
+plot(intersecao_B3_p10)
+plot(intersecao_B4_p10)
+intersecao_B3_p10
+intersecao_B4_p10
+
+# Cria o raster com a função NDVI
+NDVI_raster=NDVI(intersecao_B3_p10,intersecao_B4_p10)
+plot(NDVI_raster)
+NDVI_raster
+
+# Salva o raster NDVI
+writeRaster(NDVI_raster,"raster_NDVI.tif")
