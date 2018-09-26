@@ -31,54 +31,30 @@ B4
 res(B3)
 res(B4)
 
-B3_p10=B3
-B4_p10=B4
+B3_p1=B3
+B4_p1=B4
 
+# Sequência de etapas para padronizar a resolução dos objetos B3_p1 E B4_p1 em 1 x 1m
+B3_p1=disaggregate(B3_p1,fact=c(res(B3_p1)[1],res(B3_p1)[2]))
+B4_p1=disaggregate(B4_p1,fact=c(res(B4_p1)[1],res(B4_p1)[2]))
 
-# Sequência de etapas para padronizar a resolução dos objetos B3_p10 E B4_p10 em 10x10m
-if (res(B3_p10)[1]>=10) {
-  B3_p10=disaggregate(B3_p10,fact=c(res(B3_p10)[1]/10,1))
-} else {
-  B3_p10=disaggregate(B3_p10,fact=
-                        c(1/(10/res(B3_p10)[1]),1))
-}
+B3_p1
+B4_p1
 
-if (res(B3_p10)[2]>=10) {
-  B3_p10=disaggregate(B3_p10,fact=c(1,res(B3_p10)[2]/10))
-} else {
-  B3_p10=disaggregate(B3_p10,fact=
-                        c(1,1/(10/res(B3_p10)[2])))
-}
-
-if (res(B4_p10)[1]>=10) {
-  B4_p10=disaggregate(B4_p10,fact=c(res(B4_p10)[1]/10,1))
-} else {
-  B4_p10=disaggregate(B4_p10,fact=
-                        c(1/(10/res(B4_p10)[1]),1))
-}
-
-if (res(B4_p10)[2]>=10) {
-  B4_p10=disaggregate(B4_p10,fact=c(1,res(B4_p10)[2]/10))
-} else {
-  B4_p10=disaggregate(B4_p10,fact=
-                        c(1,1/(10/res(B4_p10)[2])))
-}
-
-B3_p10
-B4_p10
-
-# Seleciona a região de sobreposição dos dois objetos
-intersecao_B3_p10=intersect(B3_p10,B4_p10)
-intersecao_B4_p10=intersect(B4_p10,B3_p10)
-plot(intersecao_B3_p10)
-plot(intersecao_B4_p10)
-intersecao_B3_p10
-intersecao_B4_p10
+# Seleciona a área de sobreposição dos dois objetos
+intersecao_B3_p1=intersect(B3_p1,B4_p1)
+intersecao_B4_p1=intersect(B4_p1,B3_p1)
+plot(intersecao_B3_p1)
+plot(intersecao_B4_p1)
+intersecao_B3_p1
+intersecao_B4_p1
 
 # Cria o raster com a função NDVI
-NDVI_raster=NDVI(intersecao_B3_p10,intersecao_B4_p10)
+NDVI_raster=NDVI(intersecao_B3_p1,intersecao_B4_p1)
 plot(NDVI_raster)
 NDVI_raster
 
 # Salva o raster NDVI
 writeRaster(NDVI_raster,"raster_NDVI.tif")
+
+
