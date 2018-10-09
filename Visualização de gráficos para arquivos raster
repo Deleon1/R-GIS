@@ -1,0 +1,166 @@
+# Gráficos para arquivos raster
+library(sp)
+library(raster)
+library(rgdal)
+
+raster_in=raster("/home/deleon/Documents/arquivo.asc")
+plot(raster_in)
+summary(raster_in)
+
+raster_df=data.frame(coordinates(raster_in),z = values(raster_in) )
+head(raster_df)
+raster_df = na.omit(raster_df)
+head(raster_df)
+
+# Gráfico de pontos
+plot(
+  x= raster_df$z,
+  y= rep(0,length(raster_df$z)),
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "",
+  yaxt = "n")
+
+# Gráfico de pontos com tonalidade suavizada
+plot(
+  x= raster_df$z,
+  y= rep(0,length(raster_df$z)),
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "",
+  yaxt = "n",
+  pch = 16,
+  col = rgb(0,0,0,0.1))
+
+# Gráfico de pontos dispersos
+plot(
+  x= raster_df$z,
+  y= jitter(rep(0,length(raster_df$z))),
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "",
+  yaxt = "n")
+
+# Box plot
+boxplot(
+  x= raster_df$z,
+  horizontal = TRUE,
+  main = "Título do gráfico",
+  xlab = "Valores raster")
+
+# Histograma
+hist(
+  x= raster_df$z,
+  breaks = 30,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "Frequência")
+
+# Gráfico de densidade
+plot(
+  x= density(raster_df$z),
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "Densidade")
+
+
+library(lattice)
+
+# Gráfico de pontos com tonalidade suavizada
+stripplot(
+  x = ~raster_df$z,
+  data = raster_df,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  yaxt = "n",
+  pch = 16,
+  col = rgb(0,0,0,0.1))
+
+# Gráficos de pontos dispersos
+stripplot(
+  x = ~raster_df$z,
+  data = raster_df,
+  jitter = TRUE,
+  amount = 0.5,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  col="black")
+
+# Box plot
+bwplot(
+  x = ~raster_df$z,
+  data = raster_df,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  col="black")
+
+# Histograma
+histogram(
+  x = ~raster_df$z,
+  data = raster_df,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "Percentual",
+  col="grey")
+
+# Gráfico de densidade
+densityplot(
+  x = ~raster_df$z,
+  data = raster_df,
+  main = "Título do gráfico",
+  xlab = "Valores raster",
+  ylab = "Densidade",
+  col="black")
+
+
+library(ggplot2)
+
+# Gráfico de pontos
+ggplot(
+  data = raster_df,
+  aes(x= raster_df$z, stat = "count"))+
+  geom_dotplot(binwidth = 0.30)+
+  xlab("Valores raster")+
+  ylab("Frequência")+
+  ggtitle("Título do gráfico")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))
+
+# Box plot
+ggplot(
+  data = raster_df,
+  aes(x = raster_df$z, y = raster_df$z))+
+  geom_boxplot()+
+  coord_flip()+
+  xlab("")+
+  ylab("Valores raster")+
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank())+
+  ggtitle("Título do gráfico")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))
+
+# Histograma
+ggplot(
+  data = raster_df,
+  aes(x= raster_df$z))+
+  geom_histogram(binwidth = 1)+
+  xlab("Valores raster")+
+  ylab("Frequência")+
+  ggtitle("Título do gráfico")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))
+
+# Gráfico de densidade
+ggplot(
+  data = raster_df,
+  aes(x= raster_df$z))+
+  geom_density()+
+  xlab("Valores raster")+
+  ylab("Frequência")+
+  ggtitle("Título do gráfico")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))
+
+
