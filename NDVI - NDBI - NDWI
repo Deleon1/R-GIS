@@ -63,3 +63,10 @@ NDWI_raster
 
 # Salva o raster NDWI
 writeRaster(NDWI_raster,"raster_NDWI.tif", overwrite = TRUE)
+
+
+# http://wiki.dpi.inpe.br/lib/exe/fetch.php?media=cst-310-popea:monografia_monicasousa-trabfinal.pdf
+# http://www.dsr.inpe.br/sbsr2015/files/p0727.pdf
+# http://oa.upm.es/45195/1/TFM_MAYRA%20GUADALUPE_MARTINEZ_MENA.pdf
+# https://is.muni.cz/el/1431/podzim2012/Z8114/um/35399132/35460312/ndbi.pdf
+
