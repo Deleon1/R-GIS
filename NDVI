@@ -1,60 +1,65 @@
-# NDVI
-
-# Fonte dos dados: MiniCursoSPRING http://www.dpi.inpe.br/spring/portugues/manuais.html 
-# Instala os pacotes necessários
-install.packages("raster")
-install.packages("sp")
-install.packages("rgeos")
-
 # Carrega os pacotes
 library(raster)
 library(sp)
 library(rgeos)
+library(rgdal)
 
 # Seleciona a pasta que irá carregar e salvar os arquivos
 setwd("/home/deleon/Documents/Github")
+
+# Carrega os arquivos raster no R
+B3 = raster("Landsat8_B3.tif")
+B4 = raster("Landsat8_B4.tif")
+B5 = raster("Landsat8_B5.tif")
+B6 = raster("Landsat8_B6.tif")
+
+intersecao_B3 = intersect(B3,B4)
+intersecao_B4 = intersect(B4,B3)
+intersecao_B5 = intersect(B5,B4)
+intersecao_B6 = intersect(B6,B4)
+
+plot(intersecao_B3)
+plot(intersecao_B4)
+plot(intersecao_B5)
+plot(intersecao_B6)
 
 # Cria a função NDVI
 NDVI = function(RED,NIR){
   (NIR-RED)/(NIR+RED)
 }
 
-# Carrega os arquivos raster no R
-B3 = raster("LandSatTM3.tif")
-B4 = raster("LandSatTM4.tif")
-plot(B3)
-plot(B4)
-B3
-B4
-
-# Exibe a resolução dos objetos
-res(B3)
-res(B4)
-
-B3_p1=B3
-B4_p1=B4
-
-# Sequência de etapas para padronizar a resolução dos objetos B3_p1 E B4_p1 em 1 x 1m
-B3_p1=disaggregate(B3_p1,fact=c(res(B3_p1)[1],res(B3_p1)[2]))
-B4_p1=disaggregate(B4_p1,fact=c(res(B4_p1)[1],res(B4_p1)[2]))
-
-B3_p1
-B4_p1
-
-# Seleciona a área de sobreposição dos dois objetos
-intersecao_B3_p1=intersect(B3_p1,B4_p1)
-intersecao_B4_p1=intersect(B4_p1,B3_p1)
-plot(intersecao_B3_p1)
-plot(intersecao_B4_p1)
-intersecao_B3_p1
-intersecao_B4_p1
-
 # Cria o raster com a função NDVI
-NDVI_raster=NDVI(intersecao_B3_p1,intersecao_B4_p1)
+NDVI_raster=NDVI(intersecao_B4,intersecao_B5)
 plot(NDVI_raster)
 NDVI_raster
 
 # Salva o raster NDVI
-writeRaster(NDVI_raster,"raster_NDVI.tif")
+writeRaster(NDVI_raster,"raster_NDVI.tif", overwrite = TRUE)
 
+# NDBI
+# Cria a função NDBI
+NDBI = function(NIR, SWIR){
+  (SWIR - NIR) / (SWIR + NIR)
+}
 
+# Cria o raster com a função NDBI
+NDBI_raster = NDBI(intersecao_B5,intersecao_B6)
+plot(NDBI_raster)
+NDBI_raster
+
+# Salva o raster NDBI
+writeRaster(NDBI_raster,"raster_NDBI.tif", overwrite = TRUE)
+
+# NDWI McFeeters (1996)
+# Cria a função NDWI
+NDWI = function(GREEN,NIR){
+  (GREEN - NIR) / (GREEN + NIR)
+}
+
+# Cria o raster com a função NDWI
+NDWI_raster = NDWI(intersecao_B3,intersecao_B5)
+plot(NDWI_raster)
+NDWI_raster
+
+# Salva o raster NDWI
+writeRaster(NDWI_raster,"raster_NDWI.tif", overwrite = TRUE)
