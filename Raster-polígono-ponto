@@ -19,7 +19,7 @@ setwd("/home/deleon/Documents/Github")
 B3 = raster("/home/deleon/Documents/Github/LandSatTM3.tif")
 B4 = raster("/home/deleon/Documents/Github/LandSatTM4.tif")
 
-# Camada com dois pontos para cortar os raster B3 e B4
+# Camada contendo dois pontos extremos para cortar os raster B3 e B4
 pontos_corte1=data.frame(x=c(185080, 201059),y=c(8260645, 8245020))
 coordinates(pontos_corte1)=~x+y
 
@@ -34,7 +34,7 @@ coordinates(pontos_corte2)=~x+y
 proj4string(pontos_corte1)=CRS(projection(B4))
 plot(pontos_corte2,add=TRUE)
 
-# Corte do raster B3 com as dimensões da camada pontos_corte1
+# Corta o raster B3 com as dimensões da camada pontos_corte1
 parte1=crop(B3,pontos_corte1)
 plot(parte1)
 
