@@ -16,7 +16,7 @@ plot(raster_in)
 raster_in
 summary(raster_in)
 
-# Comandos para explorar o arquivo
+# Comandos para visualizar as propriedades arquivo
 crs(raster_in)
 values(raster_in)
 minValue(raster_in)
@@ -36,7 +36,7 @@ maximo_cont=maxValue(raster_continuo)
 minimo_cont=minValue(raster_continuo)
 amplitude_cont=maximo_cont-minimo_cont
 
-# os valores entre min e max do raster contínuo serão distribuídos entre 2^8=256 classes (tons), de 0 a 255
+# Transforma valores contínuos em números inteiros, distribuindo-os em 2^8=256 classes (tons), de 0 a 255 
 raster_discreto=(255/amplitude_cont)*(raster_continuo-minimo_cont)
 values(raster_discreto)
 raster_discreto[]=as.integer(round(raster_discreto[]))
@@ -44,7 +44,7 @@ values(raster_discreto)
 plot(raster_discreto)  
 writeRaster(raster_discreto,"raster_discreto.tif",overwrite = TRUE)
 
-# Classificaço do objeto raster_classificado para apresentar apenas os valores (10, 15, 20 e 25)
+# Classifica o objeto raster_discreto para apresentar apenas os valores (10, 15, 20 e 25)
 raster_classificado=raster_discreto 
 plot(raster_classificado)  
 raster_classificado[which(values(raster_classificado)<=20)]=10
@@ -65,10 +65,10 @@ writeRaster(raster_classificado,"raster_classificado.tif")
 # Número de pixels com valor igual a 10
 length(which(values(raster_discreto)==10))
 
-# Cálculo da área ocupada pelos pixels com valor igual a 10 (pixel 30 x 30 m)
+# Calcula a área ocupada pelos pixels com valor igual a 10 (pixel 30 x 30 m)
 length(which(values(raster_discreto)==10))*900
 
-# Função para cálculo do índice NDVI. Qualquer função pode ser usada.
+# Função para cálculo do NDVI
 NDVI = function(RED,NIR){
   (NIR-RED)/(NIR+RED)
   }
